@@ -53,7 +53,7 @@ def trim_lane(item):
     # this block is to maintain legacy configuration files
     trim_reads = config["algorithm"].get("trim_reads", False)
     if not trim_reads:
-        logger.info("Skipping trimming of %s." % (", ".join(to_trim)))
+        logger.info("FLAG Skipping trimming of %s." % (", ".join(to_trim)))
         return [[item]]
 
     # swap the default to None if trim_reads gets deprecated
