@@ -23,6 +23,21 @@ def write_version_py():
 with open("requirements.txt", "r") as f:
     install_requires = [x.strip() for x in f.readlines() if not x.startswith("bcbio-nextgen")]
 
+# library-only install: enable skipping of scripts and requirements for conda builds
+if "--record=/dev/null" in sys.argv:
+    scripts = []
+    install_requires = []
+    zip_safe = True
+else:
+    zip_safe = False
+    scripts = ['scripts/bcbio_nextgen.py',
+               'scripts/bam_to_wiggle.py',
+               'scripts/barcode_sort_trim.py',
+               'scripts/illumina_finished_msg.py',
+               'scripts/nextgen_analysis_server.py',
+               'scripts/solexa_qseq_to_fastq.py']
+
+
 write_version_py()
 setup(name="bcbio-nextgen",
       version=version,
