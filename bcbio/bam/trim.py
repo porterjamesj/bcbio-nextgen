@@ -2,6 +2,7 @@
 """
 import os
 import contextlib
+import time
 from bcbio.utils import (file_exists, save_diskspace, safe_makedir,
                          replace_suffix, append_stem, is_pair,
                          replace_directory, map_wrap)
@@ -196,7 +197,7 @@ def _cutadapt_trim(fastq_files, quality_format, adapters, out_files, cores):
     # realsequenceAAAAAAadapter to remove both the poly-A and the adapter
     # this behavior might not be what we want; we could also do two or
     # more passes of cutadapt
-    base_cmd = ["cutadapt", "--times=" + "2", "--quality-base=" + quality_base,
+    base_cmd = ["/usr/local/share/bcbio-nextgen/anaconda/bin/cutadapt", "--times=" + "2", "--quality-base=" + quality_base,
                 "--quality-cutoff=20", "--format=fastq", "--minimum-length=0"]
     adapter_cmd = map(lambda x: "--adapter=" + x, adapters)
     base_cmd.extend(adapter_cmd)
@@ -211,11 +212,13 @@ def _cutadapt_trim(fastq_files, quality_format, adapters, out_files, cores):
 
 @map_wrap
 def _run_cutadapt_on_single_file(base_cmd, fastq_file, out_file):
-    stat_file = replace_suffix(out_file, ".trim_stats.txt")
-    with open(stat_file, "w") as stat_handle:
-        cmd = list(base_cmd)
-        cmd.extend(["--output=" + out_file, fastq_file])
-        do.run(cmd, "Running cutadapt on %s." % (fastq_file), None)
+    tmpdir = os.path.dirname(out_file)
+    while not os.path.exists(tmpdir):
+        logger.info("temp dir %s does not exist yet, waiting.", tmpdir)
+        time.sleep(2)
+    cmd = list(base_cmd)
+    cmd.extend(["--output=" + out_file, fastq_file])
+    do.run(cmd, "Running cutadapt on %s." % (fastq_file), None)
 
 
 def _get_quality_format(lane_config):
