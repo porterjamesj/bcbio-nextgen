@@ -301,7 +301,7 @@ def _ref_version(ref_file):
 
 
 def job_requirements(cores, memory):
-    MIN_TOPHAT_MEMORY = 8.0
+    MIN_TOPHAT_MEMORY = 4.0
     if not memory or cores * memory < MIN_TOPHAT_MEMORY:
         memory = MIN_TOPHAT_MEMORY / cores
     return cores, memory
