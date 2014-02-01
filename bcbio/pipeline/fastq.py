@@ -9,6 +9,7 @@ from bcbio.bam import cram
 from bcbio.pipeline import alignment
 from bcbio.utils import file_exists, safe_makedir, flatten
 from bcbio.distributed.transaction import file_transaction
+from bcbio.provenance import do
 
 def needs_fastq_conversion(item, config):
     """Check if an item needs conversion to fastq files.
@@ -47,8 +48,7 @@ def get_fastq_files(item):
             if not os.path.exists(out_file):
                 with file_transaction(out_file) as tx_out_file:
                     cmd = "gunzip -c {fname} > {tx_out_file}".format(**locals())
-                    with open(tx_out_file, "w") as out_handle:
-                        subprocess.check_call(cmd, shell=True)
+                    do.run(cmd, "Decompressing {fname} with gunzip.".format(**locals()))
             ready_files.append(out_file)
         elif fname.endswith(".bam"):
             if _pipeline_needs_fastq(item["config"], item):
