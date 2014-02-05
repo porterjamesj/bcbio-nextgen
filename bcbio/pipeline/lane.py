@@ -136,6 +136,8 @@ def process_alignment(data):
         fastq1, fastq2 = data["files"][0], None
     config = data["config"]
     aligner = config["algorithm"].get("aligner", None)
+    if data["tuxedo"] and aligner not in ["tophat", "tophat2"]:
+        raise ValueError("Must use tophat aligner with tuxedo pipeline.")
     if fastq1 and os.path.exists(fastq1) and aligner:
         logger.info("Aligning lane %s with %s aligner" % (data["rgnames"]["lane"], aligner))
         data = align_to_sort_bam(fastq1, fastq2, aligner, data)
@@ -186,4 +188,3 @@ def _recal_no_markduplicates(data):
     data = recalibrate.prep_recal(data)[0][0]
     data["config"] = orig_config
     return data
-

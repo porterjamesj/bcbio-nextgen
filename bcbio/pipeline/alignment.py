@@ -95,11 +95,15 @@ def _align_from_fastq(fastq1, fastq2, aligner, align_ref, sam_ref, names,
     config = data["config"]
     align_fn = TOOLS[aligner].align_fn
     out = align_fn(fastq1, fastq2, align_ref, names, align_dir, data)
-    if isinstance(out, basestring) and out.endswith(".sam"):
-        if fastq2 is None and aligner in ["bwa", "bowtie2", "tophat2"]:
-            fastq1 = _remove_read_number(fastq1, out)
-        data["work_bam"] = sam_to_sort_bam(out, sam_ref, fastq1, fastq2, names, config)
-        return data
+    if isinstance(out, basestring):
+        if out.endswith(".sam"):
+            if fastq2 is None and aligner in ["bwa", "bowtie2", "tophat2"]:
+                fastq1 = _remove_read_number(fastq1, out)
+                data["work_bam"] = sam_to_sort_bam(out, sam_ref, fastq1, fastq2, names, config)
+            return data
+        if out.endswith(".bam"):
+            data["work_bam"] = out
+            return data
     else:
         return out
 

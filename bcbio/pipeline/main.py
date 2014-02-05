@@ -427,6 +427,28 @@ class RnaseqPipeline(AbstractPipeline):
         #run_parallel("generate_bigwig", samples, {"programs": ["ucsc_bigwig"]})
         return samples
 
+class TuxedoPipeline(AbstractPipeline):
+    name = "tuxedo"
+
+    @classmethod
+    def run(self, config, config_file, run_parallel, parallel, dirs, lane_items):
+        for lane_item in lane_items:
+            lane_item["tuxedo"] = True
+        lane_items = run_parallel("trim_lane", lane_items)
+        # samples = disambiguate.split(lane_items)
+        samples = run_parallel("process_alignment", samples)
+        # samples = disambiguate.resolve(samples, run_parallel)
+        samples = run_parallel("run_cufflinks", samples)
+        # samples = rnaseq.estimate_expression(samples, run_parallel)
+        # combined = combine_count_files([x[0].get("count_file") for x in samples])
+        # for x in samples:
+        #     x[0]["combined_counts"] = combined
+
+        # samples = qcsummary.generate_parallel(samples, run_parallel)
+        #run_parallel("generate_bigwig", samples, {"programs": ["ucsc_bigwig"]})
+        return samples
+
+
 class ChipseqPipeline(AbstractPipeline):
     name = "chip-seq"
 
