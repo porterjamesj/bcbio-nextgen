@@ -111,14 +111,14 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
     out_dir = os.path.join(align_dir, "%s_tophat" % out_base)
 
     if data["tuxedo"]:
-        final_out = os.path.join(out_dir, "%s.sam" % out_base)
-    else:
         final_out = os.path.join(out_dir, "%s.bam" % out_base)
-
+        out_file = os.path.join(out_dir, "accepted_hits.bam")
+    else:
+        final_out = os.path.join(out_dir, "%s.sam" % out_base)
+        out_file = os.path.join(out_dir, _out_fnames[0])
     if file_exists(final_out):
         return final_out
 
-    out_file = os.path.join(out_dir, _out_fnames[0])
     files = [ref_file, fastq_file]
     if not file_exists(out_file):
         with file_transaction(out_dir) as tx_out_dir:
@@ -147,7 +147,7 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
         if data["tuxedo"]:
             # short circuit all the sam specific stuff
             if not file_exists(final_out):
-                os.symlink(os.path.basename(fixed), final_out)
+                os.symlink(os.path.basename(out_file), final_out)
             return final_out
         _fix_empty_readnames(out_file)
     if pair_file and _has_alignments(out_file):

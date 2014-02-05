@@ -432,10 +432,10 @@ class TuxedoPipeline(AbstractPipeline):
 
     @classmethod
     def run(self, config, config_file, run_parallel, parallel, dirs, lane_items):
-        for lane_item in lane_items:
-            lane_item["tuxedo"] = True
+        for data in [x[0] for x in lane_items]:
+            data["tuxedo"] = True
         lane_items = run_parallel("trim_lane", lane_items)
-        # samples = disambiguate.split(lane_items)
+        samples = disambiguate.split(lane_items)
         samples = run_parallel("process_alignment", samples)
         # samples = disambiguate.resolve(samples, run_parallel)
         samples = run_parallel("run_cufflinks", samples)

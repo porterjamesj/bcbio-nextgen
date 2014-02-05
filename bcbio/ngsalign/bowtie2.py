@@ -34,7 +34,11 @@ def align(fastq_file, pair_file, ref_file, names, align_dir, data,
     config = data["config"]
     analysis_config = ANALYSIS.get(data["analysis"])
     assert analysis_config, "Analysis %s is not supported by bowtie2" % (data["analysis"])
-    out_file = os.path.join(align_dir, "%s.sam" % names["lane"])
+    if data["tuxedo"]:
+        out_file = os.path.join(align_dir, "%s.bam" % names["lane"])
+    else:
+        out_file = os.path.join(align_dir, "%s.sam" % names["lane"])
+    # out_file = os.path.join(align_dir, "%s.sam" % names["lane"])
     if not file_exists(out_file):
         with file_transaction(out_file) as tx_out_file:
             cl = [config_utils.get_program("bowtie2", config)]
@@ -97,4 +101,5 @@ def _is_unique(read):
 
 
 ANALYSIS = {"chip-seq": {"params": ["-X", 2000]},
-            "RNA-seq": {"params": ["--sensitive", "-X", 2000]}}
+            "RNA-seq": {"params": ["--sensitive", "-X", 2000]},
+            "tuxedo": {"params":{}}}
