@@ -63,7 +63,7 @@ def align_to_sort_bam(fastq1, fastq2, aligner, data):
     else:
         data = _align_from_fastq(fastq1, fastq2, aligner, data["align_ref"], data["sam_ref"],
                                  names, align_dir, data)
-    if data["work_bam"] and utils.file_exists(data["work_bam"]):
+    if data["work_bam"] and utils.file_exists(data["work_bam"]) and not data.get("tuxedo"):
         bam.index(data["work_bam"], data["config"])
     return data
 
