@@ -109,14 +109,15 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
         options["bowtie1"] = True
 
     out_dir = os.path.join(align_dir, "%s_tophat" % out_base)
-    if data["algorithm"].get("skip_merge"):
+    if config["algorithm"].get("skip_merge"):
         final_out = os.path.join(out_dir, "%s.bam" % out_base)
+        out_file = os.path.join(out_dir, "accepted_hits.bam")
     else:
         final_out = os.path.join(out_dir, "%s.sam" % out_base)
+        out_file = os.path.join(out_dir, _out_fnames[0])
     if file_exists(final_out):
         return final_out
 
-    out_file = os.path.join(out_dir, _out_fnames[0])
     files = [ref_file, fastq_file]
     if not file_exists(out_file):
         with file_transaction(out_dir) as tx_out_dir:
@@ -129,7 +130,7 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
                 options["mate-std-dev"] = d_stdev
                 files.append(pair_file)
             options["output-dir"] = tx_out_dir
-            if not data["algorithm"].get("skip_merge"):
+            if not config["algorithm"].get("skip_merge"):
                 options["no-convert-bam"] = True
             options["no-coverage-search"] = True
             tophat_runner = sh.Command(config_utils.get_program("tophat",
@@ -142,9 +143,11 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
             tophat_ready = tophat_runner.bake(**ready_options)
             cmd = str(tophat_ready.bake(*files))
             do.run(cmd, "Running Tophat on %s and %s." % (fastq_file, pair_file), None)
-        if data["algorithm"].get("skip_merge"):
-            data["work_bam"] = out_file
-            return out_file
+        if config["algorithm"].get("skip_merge"):
+            # short circuit all the SAM specific-stuff
+            if not file_exists(final_out):
+                os.symlink(os.path.basename(out_file), final_out)
+                return final_out
         _fix_empty_readnames(out_file)
     if pair_file and _has_alignments(out_file):
         fixed = _fix_mates(out_file, os.path.join(out_dir, "%s-align.sam" % out_base),
