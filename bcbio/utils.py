@@ -155,7 +155,7 @@ def safe_makedir(dname):
             if num_tries > max_tries:
                 raise
             num_tries += 1
-            time.sleep(2)
+            time.sleep(4*random.random())
     return dname
 
 @contextlib.contextmanager
