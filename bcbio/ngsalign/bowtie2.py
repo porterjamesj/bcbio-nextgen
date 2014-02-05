@@ -34,7 +34,7 @@ def align(fastq_file, pair_file, ref_file, names, align_dir, data,
     config = data["config"]
     analysis_config = ANALYSIS.get(data["analysis"])
     assert analysis_config, "Analysis %s is not supported by bowtie2" % (data["analysis"])
-    if data["tuxedo"]:
+    if data.get("tuxedo"):
         out_file = os.path.join(align_dir, "%s.bam" % names["lane"])
     else:
         out_file = os.path.join(align_dir, "%s.sam" % names["lane"])

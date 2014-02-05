@@ -110,7 +110,7 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
 
     out_dir = os.path.join(align_dir, "%s_tophat" % out_base)
 
-    if data["tuxedo"]:
+    if data.get("tuxedo"):
         final_out = os.path.join(out_dir, "%s.bam" % out_base)
         out_file = os.path.join(out_dir, "accepted_hits.bam")
     else:
@@ -131,7 +131,7 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
                 options["mate-std-dev"] = d_stdev
                 files.append(pair_file)
             options["output-dir"] = tx_out_dir
-            if not data["tuxedo"]:
+            if not data.get("tuxedo"):
                 options["no-convert-bam"] = True
             options["no-coverage-search"] = True
             tophat_runner = sh.Command(config_utils.get_program("tophat",
@@ -144,7 +144,7 @@ def tophat_align(fastq_file, pair_file, ref_file, out_base, align_dir, data,
             tophat_ready = tophat_runner.bake(**ready_options)
             cmd = str(tophat_ready.bake(*files))
             do.run(cmd, "Running Tophat on %s and %s." % (fastq_file, pair_file), None)
-        if data["tuxedo"]:
+        if data.get("tuxedo"):
             # short circuit all the sam specific stuff
             if not file_exists(final_out):
                 os.symlink(os.path.basename(out_file), final_out)
