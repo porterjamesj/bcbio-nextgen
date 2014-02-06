@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Setup file and install script for NextGen sequencing analysis scripts.
 """
+import sys
 import os
 from setuptools import setup, find_packages
 
