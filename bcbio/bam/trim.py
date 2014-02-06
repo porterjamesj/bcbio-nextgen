@@ -3,7 +3,6 @@
 import os
 import contextlib
 import time
-from bcbio.utils import (file_exists, save_diskspace, safe_makedir,
 from bcbio.utils import (file_exists, safe_makedir,
                          replace_suffix, append_stem, is_pair,
                          replace_directory, map_wrap)
