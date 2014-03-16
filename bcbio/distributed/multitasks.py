@@ -15,6 +15,7 @@ def process_lane(*args):
 @utils.map_wrap
 def trim_lane(*args):
     return lane.trim_lane(*args)
+trim_lane.metadata = {"resources": ["cutadapt","trimmomatic"]}
 
 @utils.map_wrap
 def process_alignment(*args):
