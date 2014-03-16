@@ -12,7 +12,7 @@ from bcbio.provenance import do
 from Bio.Seq import Seq
 from itertools import izip, repeat
 from bcbio.distributed.transaction import file_transaction
-
+from bcbio.pipeline import config_utils
 
 SUPPORTED_ADAPTERS = {
     "illumina": ["AACACTCTTTCCCT", "AGATCGGAAGAGCG"],
@@ -55,6 +55,8 @@ def trim_read_through(fastq_files, dirs, lane_config):
     MYSEQUENCEAAAARETPADA -> MYSEQUENCEAAAA (no polyA trim)
 
     """
+    if lane_config["algorithm"].get("trimmer") == "trimmomatic":
+        return _trimmomatic_trim(fastq_files, dirs, lane_config)
     quality_format = _get_quality_format(lane_config)
     to_trim = _get_sequences_to_trim(lane_config)
     out_files = _get_read_through_trimmed_outfiles(fastq_files, dirs)
@@ -119,6 +121,36 @@ def _get_sequences_to_trim(lane_config):
         trim_sequences += [str(Seq(sequence).reverse_complement()) for
                            sequence in v]
     return trim_sequences
+
+
+def _trimmomatic_trim(fastq_files, dirs, config):
+    quality_format = _get_quality_format(config)
+    to_trim = _get_sequences_to_trim(config)
+    if to_trim != []:
+        ValueError("Trimmomatic only supports quality trimming for now.")
+    out_files = _get_read_through_trimmed_outfiles(fastq_files, dirs)
+    if all(file_exists(f) for f in out_files):
+        return out_files
+    cores = config["algorithm"].get("num_cores", 1)
+    min_length = int(config["algorithm"].get("min_read_length", 20))
+    trimmomatic_jar = config_utils.get_jar("trimmomatic",
+                                           config_utils.get_program(
+                                               "trimmomatic", config, "dir"))
+    if quality_format == "illumina":
+        quality_option = "-phred64"
+    else:
+        quality_option = "-phred33"
+    fastq1 = fastq_files[0]
+    fastq2 = fastq_files[0]
+    with file_transaction(out_files) as tx_out_files:
+        out1 = tx_out_files[0]
+        out2 = tx_out_files[1]
+        cmd = ("java -jar {trimmomatic_jar} PE {quality_option} -threads {cores}"
+               "{fastq1} {fastq2} {out1} /dev/null {out2} /dev/null"
+               "LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:{min_length}")
+        do.run(cmd.format(**locals()),
+               "Running Trimmomatic on {fastq1} and {fastq2}".format(**locals()))
+    return out_files
 
 
 def _cutadapt_trim(fastq_files, quality_format, adapters, out_files, cores):
