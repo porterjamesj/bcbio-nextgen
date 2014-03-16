@@ -124,22 +124,34 @@ def _get_sequences_to_trim(lane_config):
 
 
 def _trimmomatic_trim(fastq_files, dirs, config):
-    quality_format = _get_quality_format(config)
+
+    # munge filenames
     to_trim = _get_sequences_to_trim(config)
     if to_trim != []:
         ValueError("Trimmomatic only supports quality trimming for now.")
     out_files = _get_read_through_trimmed_outfiles(fastq_files, dirs)
     if all(file_exists(f) for f in out_files):
         return out_files
+
+    # get stuff from config
     cores = config["algorithm"].get("num_cores", 1)
     min_length = int(config["algorithm"].get("min_read_length", 20))
+
+    # java shenanigans
     trimmomatic_jar = config_utils.get_jar("trimmomatic",
                                            config_utils.get_program(
                                                "trimmomatic", config, "dir"))
+    resources = config_utils.get_resources("cram", config)
+    jvm_opts = " ".join(resources.get("jvm_opts", ["-Xmx750m", "-Xmx2g"]))
+
+    # get quality format
+    quality_format = _get_quality_format(config)
     if quality_format == "illumina":
         quality_option = "-phred64"
     else:
         quality_option = "-phred33"
+
+    # let's do it!
     fastq1 = fastq_files[0]
     fastq2 = fastq_files[0]
     with file_transaction(out_files) as tx_out_files:
