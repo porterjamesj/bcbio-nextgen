@@ -158,8 +158,8 @@ def _trimmomatic_trim(fastq_files, dirs, config):
         out1 = tx_out_files[0]
         out2 = tx_out_files[1]
         cmd = ("java -jar {trimmomatic_jar} PE {quality_option} -threads {cores}"
-               "{fastq1} {fastq2} {out1} /dev/null {out2} /dev/null"
-               "LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:{min_length}")
+               " {fastq1} {fastq2} {out1} /dev/null {out2} /dev/null"
+               " LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:{min_length}")
         do.run(cmd.format(**locals()),
                "Running Trimmomatic on {fastq1} and {fastq2}".format(**locals()))
     return out_files
