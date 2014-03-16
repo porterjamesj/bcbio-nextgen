@@ -93,13 +93,17 @@ def _str_memory_to_gb(memory):
     return val
 
 
-def _get_prog_memory(resources):
+def _get_prog_memory(resources, cores):
     """Get expected memory usage, in Gb per core, for a program from resource specification.
     """
     out = None
     for jvm_opt in resources.get("jvm_opts", []):
         if jvm_opt.startswith("-Xmx"):
             out = _str_memory_to_gb(jvm_opt[4:])
+            # jvm is only requesting this much memory total, so to get
+            # per core we should divie by the number of cores
+            # . . . sigh
+            out = out / float(cores)
     memory = resources.get("memory")
     if memory:
         out = _str_memory_to_gb(memory)
@@ -150,7 +154,7 @@ def find_job_resources(fns, parallel, items, sysinfo, config, multiplier=1,
         for prog in _get_resource_programs(fn, algs):
             resources = config_utils.get_resources(prog, config)
             cores = resources.get("cores", 1)
-            memory = _get_prog_memory(resources)
+            memory = _get_prog_memory(resources, cores)
             all_cores.append(cores)
             if memory:
                 all_memory.append(memory)
