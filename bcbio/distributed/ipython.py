@@ -61,13 +61,16 @@ def _get_ensure_functions(fn, algs):
 
 def _get_used_programs(fn, algs):
     used_progs = set(["gatk", "gemini", "bcbio_coverage", "samtools",
-                      "snpEff", "cufflinks", "picard",
-                      "cutadapt", "trimmomatic"])
+                      "snpEff", "cufflinks", "picard"])
     for alg in algs:
         # get aligners used
         aligner = alg.get("aligner")
         if aligner:
             used_progs.add(aligner)
+        # get trimmers used
+        trimmer = alg.get("trimmer")
+        if trimmer:
+            used_progs.add(trimmer)
         vc = alg.get("variantcaller")
         if vc:
             if isinstance(vc, (list, tuple)):

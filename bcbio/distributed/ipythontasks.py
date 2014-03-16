@@ -49,7 +49,7 @@ process_lane.metadata = {"resources": ["picard"]}
 def trim_lane(*args):
     with _setup_logging(args):
         return apply(lane.trim_lane, *args)
-trim_lane.metadata = {"resources": ["cutadapt"]}
+trim_lane.metadata = {"resources": ["cutadapt","trimmomatic"]}
 
 @require(lane)
 def process_alignment(*args):
