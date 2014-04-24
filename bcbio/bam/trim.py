@@ -151,9 +151,8 @@ def _trimmomatic_trim(fastq_files, dirs, config):
     else:
         quality_option = "-phred33"
 
-    # let's do it!
     fastq1 = fastq_files[0]
-    fastq2 = fastq_files[0]
+    fastq2 = fastq_files[1]
     with file_transaction(out_files) as tx_out_files:
         out1 = tx_out_files[0]
         out2 = tx_out_files[1]
